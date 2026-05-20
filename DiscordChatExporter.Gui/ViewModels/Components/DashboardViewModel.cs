@@ -102,7 +102,7 @@ public partial class DashboardViewModel : ViewModelBase
         await _dialogManager.ShowDialogAsync(_viewModelManager.CreateSettingsViewModel());
 
     [RelayCommand]
-    private void ShowHelp() => ProcessEx.StartShellExecute(Program.ProjectDocumentationUrl);
+    private void ShowHelp() => ProcessEx.StartShellExecute(Program.DocumentationUrl);
 
     private bool CanPullGuilds() => !IsBusy && !string.IsNullOrWhiteSpace(Token);
 
