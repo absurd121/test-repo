@@ -1,29 +1,49 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using DiscordChatExporter.Gui.Framework;
+﻿using DiscordChatExporter.Gui.ViewModels.Framework;
 
 namespace DiscordChatExporter.Gui.ViewModels.Dialogs;
 
-public partial class MessageBoxViewModel : DialogViewModelBase
+public class MessageBoxViewModel : DialogScreen
 {
-    [ObservableProperty]
-    private string? _title = "Title";
+    public string? Title { get; set; }
 
-    [ObservableProperty]
-    private string? _message = "Message";
+    public string? Message { get; set; }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsDefaultButtonVisible))]
-    [NotifyPropertyChangedFor(nameof(ButtonsCount))]
-    private string? _defaultButtonText = "OK";
+    public bool IsOkButtonVisible { get; set; } = true;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsCancelButtonVisible))]
-    [NotifyPropertyChangedFor(nameof(ButtonsCount))]
-    private string? _cancelButtonText = "Cancel";
+    public string? OkButtonText { get; set; }
 
-    public bool IsDefaultButtonVisible => !string.IsNullOrWhiteSpace(DefaultButtonText);
+    public bool IsCancelButtonVisible { get; set; }
 
-    public bool IsCancelButtonVisible => !string.IsNullOrWhiteSpace(CancelButtonText);
+    public string? CancelButtonText { get; set; }
 
-    public int ButtonsCount => (IsDefaultButtonVisible ? 1 : 0) + (IsCancelButtonVisible ? 1 : 0);
+    public int ButtonsCount => (IsOkButtonVisible ? 1 : 0) + (IsCancelButtonVisible ? 1 : 0);
+}
+
+public static class MessageBoxViewModelExtensions
+{
+    public static MessageBoxViewModel CreateMessageBoxViewModel(
+        this IViewModelFactory factory,
+        string title,
+        string message,
+        string? okButtonText,
+        string? cancelButtonText
+    )
+    {
+        var viewModel = factory.CreateMessageBoxViewModel();
+
+        viewModel.Title = title;
+        viewModel.Message = message;
+        viewModel.IsOkButtonVisible = !string.IsNullOrWhiteSpace(okButtonText);
+        viewModel.OkButtonText = okButtonText;
+        viewModel.IsCancelButtonVisible = !string.IsNullOrWhiteSpace(cancelButtonText);
+        viewModel.CancelButtonText = cancelButtonText;
+
+        return viewModel;
+    }
+
+    public static MessageBoxViewModel CreateMessageBoxViewModel(
+        this IViewModelFactory factory,
+        string title,
+        string message
+    ) => factory.CreateMessageBoxViewModel(title, message, "CLOSE", null);
 }

@@ -93,10 +93,11 @@ internal class ExportContext(DiscordClient discord, ExportRequest request)
 
     public IReadOnlyList<Role> GetUserRoles(Snowflake id) =>
         TryGetMember(id)
-            ?.RoleIds.Select(TryGetRole)
+            ?.RoleIds
+            .Select(TryGetRole)
             .WhereNotNull()
             .OrderByDescending(r => r.Position)
-            .ToArray() ?? [];
+            .ToArray() ?? Array.Empty<Role>();
 
     public Color? TryGetUserColor(Snowflake id) =>
         GetUserRoles(id).Where(r => r.Color is not null).Select(r => r.Color).FirstOrDefault();

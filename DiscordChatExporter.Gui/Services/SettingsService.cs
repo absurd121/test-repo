@@ -1,134 +1,49 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
-using System.Text.Json.Serialization;
 using Cogwheel;
-using CommunityToolkit.Mvvm.ComponentModel;
 using DiscordChatExporter.Core.Exporting;
-using DiscordChatExporter.Gui.Framework;
 using DiscordChatExporter.Gui.Models;
+using Microsoft.Win32;
 
 namespace DiscordChatExporter.Gui.Services;
 
-// Can't use [ObservableProperty] here because System.Text.Json's source generator doesn't see
-// the generated properties.
-[INotifyPropertyChanged]
 public partial class SettingsService()
-    : SettingsBase(
-        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.dat"),
-        SerializerContext.Default
-    )
+    : SettingsBase(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.dat"))
 {
-    private bool _isUkraineSupportMessageEnabled = true;
-    public bool IsUkraineSupportMessageEnabled
-    {
-        get => _isUkraineSupportMessageEnabled;
-        set => SetProperty(ref _isUkraineSupportMessageEnabled, value);
-    }
+    public bool IsUkraineSupportMessageEnabled { get; set; } = true;
 
-    private ThemeVariant _theme;
-    public ThemeVariant Theme
-    {
-        get => _theme;
-        set => SetProperty(ref _theme, value);
-    }
+    public bool IsAutoUpdateEnabled { get; set; } = true;
 
-    private bool _isAutoUpdateEnabled = true;
-    public bool IsAutoUpdateEnabled
-    {
-        get => _isAutoUpdateEnabled;
-        set => SetProperty(ref _isAutoUpdateEnabled, value);
-    }
+    public bool IsDarkModeEnabled { get; set; } = IsDarkModeEnabledByDefault();
 
-    private bool _isTokenPersisted = true;
-    public bool IsTokenPersisted
-    {
-        get => _isTokenPersisted;
-        set => SetProperty(ref _isTokenPersisted, value);
-    }
+    public bool IsTokenPersisted { get; set; } = true;
 
-    private ThreadInclusionMode _threadInclusionMode;
-    public ThreadInclusionMode ThreadInclusionMode
-    {
-        get => _threadInclusionMode;
-        set => SetProperty(ref _threadInclusionMode, value);
-    }
+    public ThreadInclusionMode ThreadInclusionMode { get; set; } = ThreadInclusionMode.None;
 
-    private string? _locale;
-    public string? Locale
-    {
-        get => _locale;
-        set => SetProperty(ref _locale, value);
-    }
+    public string Locale { get; set; } = CultureInfo.CurrentCulture.Name;
 
-    private bool _isUtcNormalizationEnabled;
-    public bool IsUtcNormalizationEnabled
-    {
-        get => _isUtcNormalizationEnabled;
-        set => SetProperty(ref _isUtcNormalizationEnabled, value);
-    }
+    public bool IsUtcNormalizationEnabled { get; set; }
 
-    private int _parallelLimit = 1;
-    public int ParallelLimit
-    {
-        get => _parallelLimit;
-        set => SetProperty(ref _parallelLimit, value);
-    }
+    public int ParallelLimit { get; set; } = 1;
 
-    private string? _lastToken;
-    public string? LastToken
-    {
-        get => _lastToken;
-        set => SetProperty(ref _lastToken, value);
-    }
+    public Version? LastAppVersion { get; set; }
 
-    private ExportFormat _lastExportFormat = ExportFormat.HtmlDark;
-    public ExportFormat LastExportFormat
-    {
-        get => _lastExportFormat;
-        set => SetProperty(ref _lastExportFormat, value);
-    }
+    public string? LastToken { get; set; }
 
-    private string? _lastPartitionLimitValue;
-    public string? LastPartitionLimitValue
-    {
-        get => _lastPartitionLimitValue;
-        set => SetProperty(ref _lastPartitionLimitValue, value);
-    }
+    public ExportFormat LastExportFormat { get; set; } = ExportFormat.HtmlDark;
 
-    private string? _lastMessageFilterValue;
-    public string? LastMessageFilterValue
-    {
-        get => _lastMessageFilterValue;
-        set => SetProperty(ref _lastMessageFilterValue, value);
-    }
+    public string? LastPartitionLimitValue { get; set; }
 
-    private bool _lastShouldFormatMarkdown = true;
-    public bool LastShouldFormatMarkdown
-    {
-        get => _lastShouldFormatMarkdown;
-        set => SetProperty(ref _lastShouldFormatMarkdown, value);
-    }
+    public string? LastMessageFilterValue { get; set; }
 
-    private bool _lastShouldDownloadAssets;
-    public bool LastShouldDownloadAssets
-    {
-        get => _lastShouldDownloadAssets;
-        set => SetProperty(ref _lastShouldDownloadAssets, value);
-    }
+    public bool LastShouldFormatMarkdown { get; set; } = true;
 
-    private bool _lastShouldReuseAssets;
-    public bool LastShouldReuseAssets
-    {
-        get => _lastShouldReuseAssets;
-        set => SetProperty(ref _lastShouldReuseAssets, value);
-    }
+    public bool LastShouldDownloadAssets { get; set; }
 
-    private string? _lastAssetsDirPath;
-    public string? LastAssetsDirPath
-    {
-        get => _lastAssetsDirPath;
-        set => SetProperty(ref _lastAssetsDirPath, value);
-    }
+    public bool LastShouldReuseAssets { get; set; }
+
+    public string? LastAssetsDirPath { get; set; }
 
     public override void Save()
     {
@@ -145,6 +60,22 @@ public partial class SettingsService()
 
 public partial class SettingsService
 {
-    [JsonSerializable(typeof(SettingsService))]
-    private partial class SerializerContext : JsonSerializerContext;
+    private static bool IsDarkModeEnabledByDefault()
+    {
+        try
+        {
+            return Registry
+                .CurrentUser
+                .OpenSubKey(
+                    "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+                    false
+                )
+                ?.GetValue("AppsUseLightTheme")
+                is 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

@@ -1,61 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using DiscordChatExporter.Core.Utils.Extensions;
-using DiscordChatExporter.Gui.Framework;
+using System.Globalization;
+using System.Linq;
 using DiscordChatExporter.Gui.Models;
 using DiscordChatExporter.Gui.Services;
-using DiscordChatExporter.Gui.Utils;
-using DiscordChatExporter.Gui.Utils.Extensions;
+using DiscordChatExporter.Gui.ViewModels.Framework;
 
 namespace DiscordChatExporter.Gui.ViewModels.Dialogs;
 
-public class SettingsViewModel : DialogViewModelBase
+public class SettingsViewModel(SettingsService settingsService) : DialogScreen
 {
-    private readonly SettingsService _settingsService;
-
-    private readonly DisposableCollector _eventRoot = new();
-
-    public SettingsViewModel(SettingsService settingsService)
-    {
-        _settingsService = settingsService;
-
-        _eventRoot.Add(_settingsService.WatchAllProperties(OnAllPropertiesChanged));
-    }
-
-    public IReadOnlyList<ThemeVariant> AvailableThemes { get; } = Enum.GetValues<ThemeVariant>();
-
-    public ThemeVariant Theme
-    {
-        get => _settingsService.Theme;
-        set => _settingsService.Theme = value;
-    }
-
     public bool IsAutoUpdateEnabled
     {
-        get => _settingsService.IsAutoUpdateEnabled;
-        set => _settingsService.IsAutoUpdateEnabled = value;
+        get => settingsService.IsAutoUpdateEnabled;
+        set => settingsService.IsAutoUpdateEnabled = value;
+    }
+
+    public bool IsDarkModeEnabled
+    {
+        get => settingsService.IsDarkModeEnabled;
+        set => settingsService.IsDarkModeEnabled = value;
     }
 
     public bool IsTokenPersisted
     {
-        get => _settingsService.IsTokenPersisted;
-        set => _settingsService.IsTokenPersisted = value;
+        get => settingsService.IsTokenPersisted;
+        set => settingsService.IsTokenPersisted = value;
     }
 
-    public IReadOnlyList<ThreadInclusionMode> AvailableThreadInclusionModes { get; } =
+    public IReadOnlyList<ThreadInclusionMode> AvailableThreadInclusions { get; } =
         Enum.GetValues<ThreadInclusionMode>();
 
     public ThreadInclusionMode ThreadInclusionMode
     {
-        get => _settingsService.ThreadInclusionMode;
-        set => _settingsService.ThreadInclusionMode = value;
+        get => settingsService.ThreadInclusionMode;
+        set => settingsService.ThreadInclusionMode = value;
     }
 
-    // These items have to be non-nullable because Avalonia ComboBox doesn't allow a null value to be selected
-    public IReadOnlyList<string> AvailableLocales { get; } =
-        [
-            // Current locale (maps to null downstream)
-            "",
+    public IReadOnlyList<string> AvailableLocales { get; } = new[]
+        {
+            // Current locale
+            CultureInfo.CurrentCulture.Name,
             // Locales supported by the Discord app
             "da-DK",
             "de-DE",
@@ -86,35 +71,23 @@ public class SettingsViewModel : DialogViewModelBase
             "ja-JP",
             "zh-TW",
             "ko-KR"
-        ];
+        }.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
 
-    // This has to be non-nullable because Avalonia ComboBox doesn't allow a null value to be selected
     public string Locale
     {
-        get => _settingsService.Locale ?? "";
-        // Important to reduce empty strings to nulls, because empty strings don't correspond to valid cultures
-        set => _settingsService.Locale = value.NullIfWhiteSpace();
+        get => settingsService.Locale;
+        set => settingsService.Locale = value;
     }
 
     public bool IsUtcNormalizationEnabled
     {
-        get => _settingsService.IsUtcNormalizationEnabled;
-        set => _settingsService.IsUtcNormalizationEnabled = value;
+        get => settingsService.IsUtcNormalizationEnabled;
+        set => settingsService.IsUtcNormalizationEnabled = value;
     }
 
     public int ParallelLimit
     {
-        get => _settingsService.ParallelLimit;
-        set => _settingsService.ParallelLimit = Math.Clamp(value, 1, 10);
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _eventRoot.Dispose();
-        }
-
-        base.Dispose(disposing);
+        get => settingsService.ParallelLimit;
+        set => settingsService.ParallelLimit = Math.Clamp(value, 1, 10);
     }
 }

@@ -46,7 +46,7 @@ public partial class DataDump
         if (entry is null)
         {
             throw new InvalidOperationException(
-                "Failed to locate the channel index inside the data package."
+                "Could not find the channel index inside the data package."
             );
         }
 

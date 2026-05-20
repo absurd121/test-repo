@@ -57,7 +57,7 @@ public static class ExportWrapper
             await new ExportChannelsCommand
             {
                 Token = Secrets.DiscordToken,
-                ChannelIds = [channelId],
+                ChannelIds = new[] { channelId },
                 ExportFormat = format,
                 OutputPath = filePath,
                 Locale = "en-US",
@@ -93,12 +93,13 @@ public static class ExportWrapper
         Snowflake messageId
     )
     {
-        var message = (await GetMessagesAsHtmlAsync(channelId)).SingleOrDefault(e =>
-            string.Equals(
-                e.GetAttribute("data-message-id"),
-                messageId.ToString(),
-                StringComparison.OrdinalIgnoreCase
-            )
+        var message = (await GetMessagesAsHtmlAsync(channelId)).SingleOrDefault(
+            e =>
+                string.Equals(
+                    e.GetAttribute("data-message-id"),
+                    messageId.ToString(),
+                    StringComparison.OrdinalIgnoreCase
+                )
         );
 
         if (message is null)
@@ -116,12 +117,13 @@ public static class ExportWrapper
         Snowflake messageId
     )
     {
-        var message = (await GetMessagesAsJsonAsync(channelId)).SingleOrDefault(j =>
-            string.Equals(
-                j.GetProperty("id").GetString(),
-                messageId.ToString(),
-                StringComparison.OrdinalIgnoreCase
-            )
+        var message = (await GetMessagesAsJsonAsync(channelId)).SingleOrDefault(
+            j =>
+                string.Equals(
+                    j.GetProperty("id").GetString(),
+                    messageId.ToString(),
+                    StringComparison.OrdinalIgnoreCase
+                )
         );
 
         if (message.ValueKind == JsonValueKind.Undefined)

@@ -31,9 +31,6 @@ public partial record Embed(
     public SpotifyTrackEmbedProjection? TryGetSpotifyTrack() =>
         SpotifyTrackEmbedProjection.TryResolve(this);
 
-    public TwitchClipEmbedProjection? TryGetTwitchClip() =>
-        TwitchClipEmbedProjection.TryResolve(this);
-
     public YouTubeVideoEmbedProjection? TryGetYouTubeVideo() =>
         YouTubeVideoEmbedProjection.TryResolve(this);
 }
@@ -63,7 +60,7 @@ public partial record Embed
             json.GetPropertyOrNull("fields")
                 ?.EnumerateArrayOrNull()
                 ?.Select(EmbedField.Parse)
-                .ToArray() ?? [];
+                .ToArray() ?? Array.Empty<EmbedField>();
 
         var thumbnail = json.GetPropertyOrNull("thumbnail")?.Pipe(EmbedImage.Parse);
 
@@ -78,7 +75,7 @@ public partial record Embed
             json.GetPropertyOrNull("image")
                 ?.Pipe(EmbedImage.Parse)
                 .ToSingletonEnumerable()
-                .ToArray() ?? [];
+                .ToArray() ?? Array.Empty<EmbedImage>();
 
         var video = json.GetPropertyOrNull("video")?.Pipe(EmbedVideo.Parse);
 

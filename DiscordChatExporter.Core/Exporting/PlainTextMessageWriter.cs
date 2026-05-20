@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DiscordChatExporter.Core.Discord.Data;
 using DiscordChatExporter.Core.Discord.Data.Embeds;
-using DiscordChatExporter.Core.Utils.Extensions;
 
 namespace DiscordChatExporter.Core.Exporting;
 
@@ -173,14 +172,9 @@ internal class PlainTextMessageWriter(Stream stream, ExportContext context)
 
         await _writer.WriteLineAsync("{Reactions}");
 
-        foreach (var (reaction, i) in reactions.WithIndex())
+        foreach (var reaction in reactions)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            if (i > 0)
-            {
-                await _writer.WriteAsync(' ');
-            }
 
             await _writer.WriteAsync(reaction.Emoji.Name);
 
@@ -188,6 +182,8 @@ internal class PlainTextMessageWriter(Stream stream, ExportContext context)
             {
                 await _writer.WriteAsync($" ({reaction.Count})");
             }
+
+            await _writer.WriteAsync(' ');
         }
 
         await _writer.WriteLineAsync();

@@ -40,21 +40,20 @@ LABEL org.opencontainers.image.licenses="MIT"
 
 # Alpine image doesn't come with the ICU libraries pre-installed, so we need to install them manually.
 # We need the full ICU data because we allow the user to specify any locale for formatting purposes.
-RUN apk add --no-cache icu-libs icu-data-full
+RUN apk add --no-cache icu-libs
+RUN apk add --no-cache icu-data-full
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 ENV LC_ALL=en_US.UTF-8
 ENV LANG=en_US.UTF-8
 
-# Use a non-root user to ensure that the files shared with the host are accessible by the host user
+# Use a non-root user to ensure that the files shared with the host are accessible by the host user.
+# We can use the default user provided by the base image for this purpose.
 # https://github.com/Tyrrrz/DiscordChatExporter/issues/851
-# https://github.com/Tyrrrz/DiscordChatExporter/issues/1174
-RUN apk add --no-cache su-exec
-RUN addgroup -S -g 1000 dce && adduser -S -H -G dce -u 1000 dce
+USER $APP_UID
 
 # This directory is exposed to the user for mounting purposes, so it's important that it always
 # stays the same for backwards compatibility.
 WORKDIR /out
 
 COPY --from=build /tmp/app/DiscordChatExporter.Cli/bin/publish /opt/app
-COPY docker-entrypoint.sh /opt/app
-ENTRYPOINT ["/opt/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/opt/app/DiscordChatExporter.Cli"]

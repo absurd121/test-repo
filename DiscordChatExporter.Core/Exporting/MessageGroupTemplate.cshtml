@@ -448,10 +448,7 @@
                             </div>
                         }
                         // Generic video embed
-                        else if (embed.Kind == EmbedKind.Video 
-                                 && !string.IsNullOrWhiteSpace(embed.Url)
-                                 // Twitch clips cannot be embedded in local HTML files
-                                 && embed.TryGetTwitchClip() is null)
+                        else if (embed.Kind == EmbedKind.Video && !string.IsNullOrWhiteSpace(embed.Url))
                         {
                             var embedVideoUrl =
                                 embed.Video?.ProxyUrl ?? embed.Video?.Url ??

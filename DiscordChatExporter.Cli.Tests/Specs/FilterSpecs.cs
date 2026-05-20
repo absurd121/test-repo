@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CliFx.Infrastructure;
@@ -26,7 +25,7 @@ public class FilterSpecs
         await new ExportChannelsCommand
         {
             Token = Secrets.DiscordToken,
-            ChannelIds = [ChannelIds.FilterTestCases],
+            ChannelIds = new[] { ChannelIds.FilterTestCases },
             ExportFormat = ExportFormat.Json,
             OutputPath = file.Path,
             MessageFilter = MessageFilter.Parse("some text")
@@ -38,7 +37,7 @@ public class FilterSpecs
             .EnumerateArray()
             .Select(j => j.GetProperty("content").GetString())
             .Should()
-            .AllSatisfy(c => c.Contains("Some random text", StringComparison.Ordinal));
+            .ContainSingle("Some random text");
     }
 
     [Fact]
@@ -51,7 +50,7 @@ public class FilterSpecs
         await new ExportChannelsCommand
         {
             Token = Secrets.DiscordToken,
-            ChannelIds = [ChannelIds.FilterTestCases],
+            ChannelIds = new[] { ChannelIds.FilterTestCases },
             ExportFormat = ExportFormat.Json,
             OutputPath = file.Path,
             MessageFilter = MessageFilter.Parse("from:Tyrrrz")
@@ -67,7 +66,7 @@ public class FilterSpecs
     }
 
     [Fact]
-    public async Task I_can_filter_the_export_to_only_include_messages_that_contain_images()
+    public async Task I_can_filter_the_export_to_only_include_messages_that_contain_the_specified_content()
     {
         // Arrange
         using var file = TempFile.Create();
@@ -76,7 +75,7 @@ public class FilterSpecs
         await new ExportChannelsCommand
         {
             Token = Secrets.DiscordToken,
-            ChannelIds = [ChannelIds.FilterTestCases],
+            ChannelIds = new[] { ChannelIds.FilterTestCases },
             ExportFormat = ExportFormat.Json,
             OutputPath = file.Path,
             MessageFilter = MessageFilter.Parse("has:image")
@@ -88,7 +87,7 @@ public class FilterSpecs
             .EnumerateArray()
             .Select(j => j.GetProperty("content").GetString())
             .Should()
-            .AllSatisfy(c => c.Contains("This has image", StringComparison.Ordinal));
+            .ContainSingle("This has image");
     }
 
     [Fact]
@@ -101,7 +100,7 @@ public class FilterSpecs
         await new ExportChannelsCommand
         {
             Token = Secrets.DiscordToken,
-            ChannelIds = [ChannelIds.FilterTestCases],
+            ChannelIds = new[] { ChannelIds.FilterTestCases },
             ExportFormat = ExportFormat.Json,
             OutputPath = file.Path,
             MessageFilter = MessageFilter.Parse("has:pin")
@@ -113,32 +112,7 @@ public class FilterSpecs
             .EnumerateArray()
             .Select(j => j.GetProperty("content").GetString())
             .Should()
-            .AllSatisfy(c => c.Contains("This is pinned", StringComparison.Ordinal));
-    }
-
-    [Fact]
-    public async Task I_can_filter_the_export_to_only_include_messages_that_contain_guild_invites()
-    {
-        // Arrange
-        using var file = TempFile.Create();
-
-        // Act
-        await new ExportChannelsCommand
-        {
-            Token = Secrets.DiscordToken,
-            ChannelIds = [ChannelIds.FilterTestCases],
-            ExportFormat = ExportFormat.Json,
-            OutputPath = file.Path,
-            MessageFilter = MessageFilter.Parse("has:invite")
-        }.ExecuteAsync(new FakeConsole());
-
-        // Assert
-        Json.Parse(await File.ReadAllTextAsync(file.Path))
-            .GetProperty("messages")
-            .EnumerateArray()
-            .Select(j => j.GetProperty("content").GetString())
-            .Should()
-            .AllSatisfy(c => c.Contains("This has invite", StringComparison.Ordinal));
+            .ContainSingle("This is pinned");
     }
 
     [Fact]
@@ -151,7 +125,7 @@ public class FilterSpecs
         await new ExportChannelsCommand
         {
             Token = Secrets.DiscordToken,
-            ChannelIds = [ChannelIds.FilterTestCases],
+            ChannelIds = new[] { ChannelIds.FilterTestCases },
             ExportFormat = ExportFormat.Json,
             OutputPath = file.Path,
             MessageFilter = MessageFilter.Parse("mentions:Tyrrrz")
@@ -163,6 +137,6 @@ public class FilterSpecs
             .EnumerateArray()
             .Select(j => j.GetProperty("content").GetString())
             .Should()
-            .AllSatisfy(c => c.Contains("This has mention", StringComparison.Ordinal));
+            .ContainSingle("This has mention");
     }
 }

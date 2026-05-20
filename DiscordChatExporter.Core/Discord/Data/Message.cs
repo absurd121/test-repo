@@ -83,15 +83,16 @@ public partial record Message
                 // Find embeds with the same URL that only contain a single image and nothing else
                 var trailingEmbeds = embeds
                     .Skip(i + 1)
-                    .TakeWhile(e =>
-                        e.Url == embed.Url
-                        && e.Timestamp is null
-                        && e.Author is null
-                        && e.Color is null
-                        && string.IsNullOrWhiteSpace(e.Description)
-                        && !e.Fields.Any()
-                        && e.Images.Count == 1
-                        && e.Footer is null
+                    .TakeWhile(
+                        e =>
+                            e.Url == embed.Url
+                            && e.Timestamp is null
+                            && e.Author is null
+                            && e.Color is null
+                            && string.IsNullOrWhiteSpace(e.Description)
+                            && !e.Fields.Any()
+                            && e.Images.Count == 1
+                            && e.Footer is null
                     )
                     .ToArray();
 
@@ -99,7 +100,8 @@ public partial record Message
                 {
                     // Concatenate all images into one embed
                     var images = embed
-                        .Images.Concat(trailingEmbeds.SelectMany(e => e.Images))
+                        .Images
+                        .Concat(trailingEmbeds.SelectMany(e => e.Images))
                         .ToArray();
 
                     normalizedEmbeds.Add(embed with { Images = images });
@@ -143,28 +145,28 @@ public partial record Message
             json.GetPropertyOrNull("attachments")
                 ?.EnumerateArrayOrNull()
                 ?.Select(Attachment.Parse)
-                .ToArray() ?? [];
+                .ToArray() ?? Array.Empty<Attachment>();
 
         var embeds = NormalizeEmbeds(
             json.GetPropertyOrNull("embeds")?.EnumerateArrayOrNull()?.Select(Embed.Parse).ToArray()
-                ?? []
+                ?? Array.Empty<Embed>()
         );
 
         var stickers =
             json.GetPropertyOrNull("sticker_items")
                 ?.EnumerateArrayOrNull()
                 ?.Select(Sticker.Parse)
-                .ToArray() ?? [];
+                .ToArray() ?? Array.Empty<Sticker>();
 
         var reactions =
             json.GetPropertyOrNull("reactions")
                 ?.EnumerateArrayOrNull()
                 ?.Select(Reaction.Parse)
-                .ToArray() ?? [];
+                .ToArray() ?? Array.Empty<Reaction>();
 
         var mentionedUsers =
             json.GetPropertyOrNull("mentions")?.EnumerateArrayOrNull()?.Select(User.Parse).ToArray()
-            ?? [];
+            ?? Array.Empty<User>();
 
         var messageReference = json.GetPropertyOrNull("message_reference")
             ?.Pipe(MessageReference.Parse);

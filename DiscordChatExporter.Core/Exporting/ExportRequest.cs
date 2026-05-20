@@ -8,7 +8,6 @@ using DiscordChatExporter.Core.Discord.Data;
 using DiscordChatExporter.Core.Exporting.Filtering;
 using DiscordChatExporter.Core.Exporting.Partitioning;
 using DiscordChatExporter.Core.Utils;
-using DiscordChatExporter.Core.Utils.Extensions;
 
 namespace DiscordChatExporter.Core.Exporting;
 
@@ -40,9 +39,9 @@ public partial class ExportRequest
 
     public bool ShouldReuseAssets { get; }
 
-    public string? Locale { get; }
+    public string Locale { get; }
 
-    public CultureInfo? CultureInfo { get; }
+    public CultureInfo CultureInfo { get; }
 
     public bool IsUtcNormalizationEnabled { get; }
 
@@ -59,7 +58,7 @@ public partial class ExportRequest
         bool shouldFormatMarkdown,
         bool shouldDownloadAssets,
         bool shouldReuseAssets,
-        string? locale,
+        string locale,
         bool isUtcNormalizationEnabled
     )
     {
@@ -84,7 +83,7 @@ public partial class ExportRequest
             ? FormatPath(assetsDirPath, Guild, Channel, After, Before)
             : $"{OutputFilePath}_Files{Path.DirectorySeparatorChar}";
 
-        CultureInfo = Locale?.Pipe(CultureInfo.GetCultureInfo);
+        CultureInfo = CultureInfo.GetCultureInfo(Locale);
     }
 }
 
@@ -183,10 +182,9 @@ public partial class ExportRequest
                             => before?.ToDate().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
                                 ?? "",
                         "%d"
-                            => DateTimeOffset.Now.ToString(
-                                "yyyy-MM-dd",
-                                CultureInfo.InvariantCulture
-                            ),
+                            => DateTimeOffset
+                                .Now
+                                .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
 
                         "%%" => "%",
                         _ => m.Value

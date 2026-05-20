@@ -30,8 +30,8 @@ internal static class FilterGrammar
         .OneOf(QuotedString, UnquotedString)
         .Named("text string");
 
-    private static readonly TextParser<MessageFilter> ContainsFilter = String.Select(v =>
-        (MessageFilter)new ContainsMessageFilter(v)
+    private static readonly TextParser<MessageFilter> ContainsFilter = String.Select(
+        v => (MessageFilter)new ContainsMessageFilter(v)
     );
 
     private static readonly TextParser<MessageFilter> FromFilter = Span.EqualToIgnoreCase("from:")
@@ -61,28 +61,18 @@ internal static class FilterGrammar
         .IgnoreThen(
             Parse.OneOf(
                 Span.EqualToIgnoreCase("link")
-                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Link))
-                    .Try(),
+                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Link)),
                 Span.EqualToIgnoreCase("embed")
-                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Embed))
-                    .Try(),
+                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Embed)),
                 Span.EqualToIgnoreCase("file")
-                    .IgnoreThen(Parse.Return(MessageContentMatchKind.File))
-                    .Try(),
+                    .IgnoreThen(Parse.Return(MessageContentMatchKind.File)),
                 Span.EqualToIgnoreCase("video")
-                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Video))
-                    .Try(),
+                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Video)),
                 Span.EqualToIgnoreCase("image")
-                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Image))
-                    .Try(),
+                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Image)),
                 Span.EqualToIgnoreCase("sound")
                     .IgnoreThen(Parse.Return(MessageContentMatchKind.Sound)),
-                Span.EqualToIgnoreCase("pin")
-                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Pin))
-                    .Try(),
-                Span.EqualToIgnoreCase("invite")
-                    .IgnoreThen(Parse.Return(MessageContentMatchKind.Invite))
-                    .Try()
+                Span.EqualToIgnoreCase("pin").IgnoreThen(Parse.Return(MessageContentMatchKind.Pin))
             )
         )
         .Select(k => (MessageFilter)new HasMessageFilter(k))
